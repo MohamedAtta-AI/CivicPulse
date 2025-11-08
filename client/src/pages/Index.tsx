@@ -1,4 +1,3 @@
-import { useState } from "react";
 import { DashboardHeader } from "@/components/DashboardHeader";
 import { MetricsOverview } from "@/components/MetricsOverview";
 import { SentimentChart } from "@/components/SentimentChart";
@@ -8,12 +7,11 @@ import { ChatSidebar } from "@/components/ChatSidebar";
 import { useLanguage } from "@/contexts/LanguageContext";
 
 const Index = () => {
-  const [userRole] = useState<"admin" | "editor" | "reader">("admin");
   const { t } = useLanguage();
 
   return (
     <div className="min-h-screen bg-background">
-      <DashboardHeader userRole={userRole} />
+      <DashboardHeader />
       
       {/* Banner Image */}
       <div className="w-full h-64 md:h-80 lg:h-96 overflow-hidden relative">

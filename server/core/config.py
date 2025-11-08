@@ -12,6 +12,9 @@ class Settings(BaseSettings):
     DB_HOST: Optional[str] = Field(default=None)
     DB_PORT: Optional[int] = Field(default=5432)
     DB_NAME: Optional[str] = Field(default=None)
+    SECRET_KEY: str = Field(default="your-secret-key-change-in-production")
+    ALGORITHM: str = Field(default="HS256")
+    ACCESS_TOKEN_EXPIRE_MINUTES: int = Field(default=30)
 
     class Config:
         env_file = ".env"
