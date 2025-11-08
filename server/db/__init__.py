@@ -1,5 +1,5 @@
 from sqlmodel import SQLModel, Session, create_engine
-from backend.core import get_settings
+from server.core import get_settings
 
 settings = get_settings()
 engine = create_engine(settings.db_url, echo=(not settings.PROD))

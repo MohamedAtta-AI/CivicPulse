@@ -3,7 +3,8 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
 from core.config import settings
-from db.init_db import init_db
+from db import init_db
+
 
 app = FastAPI(title=settings.APP_NAME)
 
