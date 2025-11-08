@@ -3,7 +3,7 @@ from core.config import get_settings
 
 settings = get_settings()
 # Only create engine if DB settings are provided
-if all([settings.DB_USER, settings.DB_PASS, settings.DB_HOST, settings.DB_NAME]):
+if all([settings.POSTGRES_USER, settings.POSTGRES_PASS, settings.POSTGRES_HOST, settings.POSTGRES_NAME]):
     engine = create_engine(settings.db_url, echo=(not settings.PROD))
 else:
     engine = None
