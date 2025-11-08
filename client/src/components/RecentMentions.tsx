@@ -1,59 +1,30 @@
+import { useState, useEffect } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { formatDistanceToNow } from "date-fns";
 import { nl, enUS } from "date-fns/locale";
 import { useLanguage } from "@/contexts/LanguageContext";
+import { api, Mention } from "@/lib/api";
 
 export const RecentMentions = () => {
   const { t, language } = useLanguage();
-  const mentions = [
-    {
-      id: 1,
-      author: "Jan de Vries",
-      platform: "X",
-      content: "Geweldig om te zien dat de gemeente eindelijk werk maakt van groenvoorzieningen! 🌳",
-      sentiment: "positive",
-      timestamp: new Date(Date.now() - 1000 * 60 * 15),
-      topic: "groenvoorziening",
-    },
-    {
-      id: 2,
-      author: "Maria Janssen",
-      platform: "Facebook",
-      content: "Weer files in het centrum. Wanneer komt er een oplossing voor de verkeersproblemen?",
-      sentiment: "negative",
-      timestamp: new Date(Date.now() - 1000 * 60 * 32),
-      topic: "verkeer",
-    },
-    {
-      id: 3,
-      author: "Peter Bakker",
-      platform: "LinkedIn",
-      content: "Mooie ontwikkelingen in de lokale economie. Trots op onze gemeente!",
-      sentiment: "positive",
-      timestamp: new Date(Date.now() - 1000 * 60 * 47),
-      topic: "economie",
-    },
-    {
-      id: 4,
-      author: "Sophie Verhoeven",
-      platform: "Instagram",
-      content: "Leuk evenement afgelopen weekend! Meer van dit soort initiatieven graag 🎉",
-      sentiment: "positive",
-      timestamp: new Date(Date.now() - 1000 * 60 * 68),
-      topic: "evenementen",
-    },
-    {
-      id: 5,
-      author: "Thomas van Dijk",
-      platform: "X",
-      content: "Parkeren is echt een ramp hier. Kan hier iets aan gedaan worden?",
-      sentiment: "negative",
-      timestamp: new Date(Date.now() - 1000 * 60 * 95),
-      topic: "parkeren",
-    },
-  ];
+  const [mentions, setMentions] = useState<Mention[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchMentions = async () => {
+      try {
+        const data = await api.getMentions();
+        setMentions(data);
+      } catch (error) {
+        console.error("Failed to fetch mentions:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchMentions();
+  }, []);
 
   const sentimentColors = {
     positive: "bg-success/10 text-success border-success/20",
@@ -67,6 +38,20 @@ export const RecentMentions = () => {
     LinkedIn: "bg-chart-3/10 text-chart-3",
     Instagram: "bg-chart-4/10 text-chart-4",
   };
+
+  if (loading) {
+    return (
+      <Card className="col-span-full">
+        <CardHeader>
+          <CardTitle>{t("recentMentions")}</CardTitle>
+          <CardDescription>{t("recentMentionsDescription")}</CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <div className="animate-pulse text-muted-foreground text-center py-8">Loading mentions...</div>
+        </CardContent>
+      </Card>
+    );
+  }
 
   return (
     <Card className="col-span-full">
@@ -87,7 +72,7 @@ export const RecentMentions = () => {
                 <div>
                   <p className="font-medium text-foreground">{mention.author}</p>
                   <p className="text-xs text-muted-foreground">
-                    {formatDistanceToNow(mention.timestamp, { 
+                    {formatDistanceToNow(new Date(mention.timestamp), { 
                       addSuffix: true, 
                       locale: language === "nl" ? nl : enUS 
                     })}

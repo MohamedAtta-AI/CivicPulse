@@ -2,10 +2,11 @@ from contextlib import asynccontextmanager
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
-from core.config import settings
+from core.config import get_settings
 from db import init_db
+from api.dashboard import router as dashboard_router
 
-
+settings = get_settings()
 app = FastAPI(title=settings.APP_NAME)
 
 app.add_middleware(
@@ -21,6 +22,9 @@ app.add_middleware(
 async def lifespan(app: FastAPI):
     init_db()
     yield
+
+
+app.include_router(dashboard_router)
 
 
 @app.get("/")

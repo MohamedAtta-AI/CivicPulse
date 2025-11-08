@@ -1,53 +1,62 @@
+import { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { TrendingUp, TrendingDown, MessageSquare, Users } from "lucide-react";
+import { TrendingUp, TrendingDown, AlertTriangle, ThumbsUp, Users, Activity } from "lucide-react";
 import { useLanguage } from "@/contexts/LanguageContext";
+import { api, Metric } from "@/lib/api";
+
+const iconMap: Record<string, React.ComponentType<{ className?: string }>> = {
+  ThumbsUp,
+  AlertTriangle,
+  Activity,
+  Users,
+};
 
 export const MetricsOverview = () => {
   const { t } = useLanguage();
-  const metrics = [
-    {
-      title: t("totalMentions"),
-      value: "12,847",
-      change: "+15.2%",
-      trend: "up",
-      icon: MessageSquare,
-      color: "text-chart-1",
-    },
-    {
-      title: t("activeCitizens"),
-      value: "3,421",
-      change: "+8.1%",
-      trend: "up",
-      icon: Users,
-      color: "text-chart-2",
-    },
-    {
-      title: t("positiveSentiment"),
-      value: "64%",
-      change: "-3.2%",
-      trend: "down",
-      icon: TrendingUp,
-      color: "text-chart-3",
-    },
-    {
-      title: t("engagementRate"),
-      value: "42%",
-      change: "+12.5%",
-      trend: "up",
-      icon: TrendingUp,
-      color: "text-chart-4",
-    },
-  ];
+  const [metrics, setMetrics] = useState<Metric[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchMetrics = async () => {
+      try {
+        const data = await api.getMetrics();
+        setMetrics(data);
+      } catch (error) {
+        console.error("Failed to fetch metrics:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchMetrics();
+  }, []);
+
+  if (loading) {
+    return (
+      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+        {[1, 2, 3, 4].map((i) => (
+          <Card key={i}>
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium text-muted-foreground animate-pulse bg-muted h-4 w-24 rounded" />
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold text-foreground animate-pulse bg-muted h-8 w-16 rounded mb-2" />
+              <div className="animate-pulse bg-muted h-3 w-32 rounded" />
+            </CardContent>
+          </Card>
+        ))}
+      </div>
+    );
+  }
 
   return (
     <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
       {metrics.map((metric) => {
-        const Icon = metric.icon;
+        const Icon = iconMap[metric.icon] || ThumbsUp;
         return (
           <Card key={metric.title}>
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
               <CardTitle className="text-sm font-medium text-muted-foreground">
-                {metric.title}
+                {t(metric.title as any)}
               </CardTitle>
               <Icon className={`h-4 w-4 ${metric.color}`} />
             </CardHeader>

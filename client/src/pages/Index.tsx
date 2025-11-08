@@ -34,10 +34,10 @@ const Index = () => {
 
 
 
-        <div className="flex gap-6">
+        <div className="flex gap-6 items-stretch">
 
-        <div className="w-96">
-            <div className="sticky top-6 h-[calc(100vh-8rem)]">
+        <div className="w-96 h-[600px] flex flex-col">
+            <div className="sticky top-6 w-full h-full max-h-full">
               <ChatSidebar />
             </div>
           </div>
@@ -50,8 +50,6 @@ const Index = () => {
               <TopicsWordCloud />
             </div>
           </div>
-
-
         </div>
       </main>
     </div>

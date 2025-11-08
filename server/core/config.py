@@ -1,20 +1,21 @@
-from typing import Literal
+from typing import Literal, Optional
 from functools import lru_cache
-from pydantic import BaseSettings, Field, AnyUrl
+from pydantic_settings import BaseSettings
+from pydantic import Field
 
 
 class Settings(BaseSettings):
-    APP_NAME: str = Field(default="CivicPulse", env="APP_NAME")
-    PROD: bool = Field(default=False, env="PROD")
-    DB_USER: str = Field(..., env="DB_USER")
-    DB_PASS: str = Field(..., env="DB_PASS")
-    DB_HOST: str = Field(..., env="DB_HOST")
-    DB_PORT: int = Field(..., env="DB_PORT")
-    DB_NAME: str = Field(default=5432, env="DB_NAME")
-
+    APP_NAME: str = Field(default="CivicPulse")
+    PROD: bool = Field(default=False)
+    DB_USER: Optional[str] = Field(default=None)
+    DB_PASS: Optional[str] = Field(default=None)
+    DB_HOST: Optional[str] = Field(default=None)
+    DB_PORT: Optional[int] = Field(default=5432)
+    DB_NAME: Optional[str] = Field(default=None)
 
     class Config:
         env_file = ".env"
+        case_sensitive = False
 
     @property
     def db_url(self) -> str:
