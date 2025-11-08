@@ -1,7 +1,8 @@
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
-import { Bell, Download, Settings, Languages } from "lucide-react";
+import { Languages } from "lucide-react";
 import { useLanguage } from "@/contexts/LanguageContext";
+import { DashboardExport } from "@/components/DashboardExport";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -53,9 +54,7 @@ export const DashboardHeader = ({ userRole }: DashboardHeaderProps) => {
               </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
-          <Button variant="ghost" size="icon">
-            <Download className="h-5 w-5" />
-          </Button>
+          <DashboardExport />
 
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
