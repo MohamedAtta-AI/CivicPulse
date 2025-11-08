@@ -16,9 +16,10 @@ app.add_middleware(
 )
 
 
-@app.on_event("startup")
-def on_startup():
+@asynccontextmanager
+async def lifespan(app: FastAPI):
     init_db()
+    yield
 
 
 @app.get("/")
