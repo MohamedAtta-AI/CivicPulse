@@ -11,4 +11,5 @@ dependencies = [
     "sqlmodel>=0.0.27",
     "pydantic-settings>=2.0.0",
     "psycopg2>=2.9.11",
+    "groq>=0.33.0",
 ]

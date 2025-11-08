@@ -5,6 +5,7 @@ import { Input } from "@/components/ui/input";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Send, Sparkles } from "lucide-react";
 import { useLanguage } from "@/contexts/LanguageContext";
+import { api } from "@/lib/api";
 
 interface Message {
   role: "user" | "assistant";
@@ -22,6 +23,7 @@ export const ChatSidebar = () => {
     }
   ]);
   const [input, setInput] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
   const scrollAreaRef = useRef<HTMLDivElement>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
@@ -64,25 +66,35 @@ export const ChatSidebar = () => {
 
   useLayoutEffect(() => {
     scrollToBottom();
-  }, [messages]);
+  }, [messages, isLoading]);
 
-  const handleSend = () => {
-    if (!input.trim()) return;
+  const handleSend = async () => {
+    if (!input.trim() || isLoading) return;
 
     const userMessage: Message = { role: "user", content: input };
     setMessages(prev => [...prev, userMessage]);
+    const currentInput = input;
     setInput("");
+    setIsLoading(true);
 
-    // Simulate AI response
-    setTimeout(() => {
+    try {
+      const response = await api.sendMessage(currentInput);
       const aiMessage: Message = {
         role: "assistant",
-        content: language === "nl"
-          ? "Dit is een voorbeeld antwoord. Integreer met een echte AI voor daadwerkelijke antwoorden."
-          : "This is a sample response. Integrate with a real AI for actual responses."
+        content: response.response
       };
       setMessages(prev => [...prev, aiMessage]);
-    }, 500);
+    } catch (error) {
+      const errorMessage: Message = {
+        role: "assistant",
+        content: language === "nl"
+          ? `Fout bij het ophalen van antwoord: ${error instanceof Error ? error.message : "Onbekende fout"}`
+          : `Error fetching response: ${error instanceof Error ? error.message : "Unknown error"}`
+      };
+      setMessages(prev => [...prev, errorMessage]);
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
@@ -115,6 +127,15 @@ export const ChatSidebar = () => {
                 </div>
               </div>
             ))}
+            {isLoading && (
+              <div className="flex justify-start">
+                <div className="max-w-[80%] rounded-lg px-4 py-2 bg-muted text-foreground">
+                  <p className="text-sm italic">
+                    {language === "nl" ? "Denken..." : "Thinking..."}
+                  </p>
+                </div>
+              </div>
+            )}
             <div ref={messagesEndRef} />
           </div>
         </ScrollArea>
@@ -125,11 +146,12 @@ export const ChatSidebar = () => {
           <Input
             value={input}
             onChange={(e) => setInput(e.target.value)}
-            onKeyPress={(e) => e.key === "Enter" && handleSend()}
+            onKeyPress={(e) => e.key === "Enter" && !isLoading && handleSend()}
             placeholder={language === "nl" ? "Stel een vraag..." : "Ask a question..."}
             className="flex-1"
+            disabled={isLoading}
           />
-          <Button onClick={handleSend} size="icon">
+          <Button onClick={handleSend} size="icon" disabled={isLoading}>
             <Send className="h-4 w-4" />
           </Button>
         </div>
