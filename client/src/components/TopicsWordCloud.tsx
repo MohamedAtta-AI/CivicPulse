@@ -1,23 +1,27 @@
+import { useState, useEffect } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { useLanguage } from "@/contexts/LanguageContext";
+import { api, Topic } from "@/lib/api";
 
 export const TopicsWordCloud = () => {
   const { t } = useLanguage();
-  const topics = [
-    { text: "verkeer", count: 245, sentiment: "negative" },
-    { text: "groenvoorziening", count: 189, sentiment: "positive" },
-    { text: "veiligheid", count: 167, sentiment: "neutral" },
-    { text: "parkeren", count: 156, sentiment: "negative" },
-    { text: "onderwijs", count: 142, sentiment: "positive" },
-    { text: "afval", count: 128, sentiment: "neutral" },
-    { text: "evenementen", count: 115, sentiment: "positive" },
-    { text: "fietspaden", count: 98, sentiment: "positive" },
-    { text: "winkels", count: 87, sentiment: "neutral" },
-    { text: "jeugd", count: 76, sentiment: "positive" },
-    { text: "bereikbaarheid", count: 72, sentiment: "negative" },
-    { text: "speeltuinen", count: 65, sentiment: "positive" },
-  ];
+  const [topics, setTopics] = useState<Topic[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchTopics = async () => {
+      try {
+        const data = await api.getTopics();
+        setTopics(data);
+      } catch (error) {
+        console.error("Failed to fetch topics:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchTopics();
+  }, []);
 
   const getSizeClass = (count: number) => {
     if (count > 200) return "text-xl";
@@ -32,6 +36,22 @@ export const TopicsWordCloud = () => {
     if (sentiment === "negative") return "text-destructive";
     return "text-muted-foreground";
   };
+
+  if (loading) {
+    return (
+      <Card>
+        <CardHeader>
+          <CardTitle>{t("topicsTitle")}</CardTitle>
+          <CardDescription>{t("topicsDescription")}</CardDescription>
+        </CardHeader>
+        <CardContent className="pb-4">
+          <div className="flex flex-wrap items-center justify-center gap-2 p-2 min-h-[180px]">
+            <div className="animate-pulse text-muted-foreground">Loading topics...</div>
+          </div>
+        </CardContent>
+      </Card>
+    );
+  }
 
   return (
     <Card>

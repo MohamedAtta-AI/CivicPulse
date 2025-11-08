@@ -1,17 +1,43 @@
+import { useState, useEffect } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { PieChart, Pie, Cell, ResponsiveContainer, Legend, Tooltip } from "recharts";
 import { useLanguage } from "@/contexts/LanguageContext";
+import { api, SourceData } from "@/lib/api";
 
 export const SourceBreakdown = () => {
   const { t } = useLanguage();
-  const data = [
-    { name: "X (Twitter)", value: 3245, color: "hsl(var(--chart-1))" },
-    { name: "Facebook", value: 2891, color: "hsl(var(--chart-2))" },
-    { name: "Instagram", value: 2456, color: "hsl(var(--chart-4))" },
-    { name: "LinkedIn", value: 1678, color: "hsl(var(--chart-3))" },
-    { name: "Nieuwssites", value: 1432, color: "hsl(var(--chart-5))" },
-    { name: "Overig", value: 1145, color: "hsl(var(--muted))" },
-  ];
+  const [data, setData] = useState<SourceData[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchSources = async () => {
+      try {
+        const sources = await api.getSources();
+        setData(sources);
+      } catch (error) {
+        console.error("Failed to fetch sources:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchSources();
+  }, []);
+
+  if (loading) {
+    return (
+      <Card>
+        <CardHeader>
+          <CardTitle>{t("sourcesTitle")}</CardTitle>
+          <CardDescription>{t("sourcesDescription")}</CardDescription>
+        </CardHeader>
+        <CardContent>
+          <div className="h-[300px] flex items-center justify-center">
+            <div className="animate-pulse text-muted-foreground">Loading...</div>
+          </div>
+        </CardContent>
+      </Card>
+    );
+  }
 
   return (
     <Card>

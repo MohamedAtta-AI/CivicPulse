@@ -1,18 +1,50 @@
+import { useState, useEffect } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend } from "recharts";
 import { useLanguage } from "@/contexts/LanguageContext";
+import { api, SentimentData } from "@/lib/api";
 
 export const SentimentChart = () => {
   const { t, language } = useLanguage();
-  const data = [
-    { dag: t("monday"), positief: 45, neutraal: 30, negatief: 25 },
-    { dag: t("tuesday"), positief: 52, neutraal: 28, negatief: 20 },
-    { dag: t("wednesday"), positief: 48, neutraal: 32, negatief: 20 },
-    { dag: t("thursday"), positief: 61, neutraal: 25, negatief: 14 },
-    { dag: t("friday"), positief: 55, neutraal: 30, negatief: 15 },
-    { dag: t("saturday"), positief: 40, neutraal: 35, negatief: 25 },
-    { dag: t("sunday"), positief: 38, neutraal: 37, negatief: 25 },
-  ];
+  const [data, setData] = useState<SentimentData[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchSentiment = async () => {
+      try {
+        const sentimentData = await api.getSentiment();
+        setData(sentimentData);
+      } catch (error) {
+        console.error("Failed to fetch sentiment data:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchSentiment();
+  }, []);
+
+  const chartData = data.map((item) => ({
+    dag: t(item.day as any),
+    positief: item.positive,
+    neutraal: item.neutral,
+    negatief: item.negative,
+  }));
+
+  if (loading) {
+    return (
+      <Card className="col-span-2">
+        <CardHeader>
+          <CardTitle>{t("sentimentAnalysis")}</CardTitle>
+          <CardDescription>{t("sentimentDescription")}</CardDescription>
+        </CardHeader>
+        <CardContent className="pb-4">
+          <div className="h-[220px] flex items-center justify-center">
+            <div className="animate-pulse text-muted-foreground">Loading...</div>
+          </div>
+        </CardContent>
+      </Card>
+    );
+  }
 
   return (
     <Card className="col-span-2">
@@ -22,7 +54,7 @@ export const SentimentChart = () => {
       </CardHeader>
       <CardContent className="pb-4">
         <ResponsiveContainer width="100%" height={220}>
-          <BarChart data={data} margin={{ top: 5, right: 10, left: 0, bottom: 5 }}>
+          <BarChart data={chartData} margin={{ top: 5, right: 10, left: 0, bottom: 5 }}>
             <CartesianGrid strokeDasharray="3 3" className="stroke-border opacity-30" />
             <XAxis 
               dataKey="dag" 
