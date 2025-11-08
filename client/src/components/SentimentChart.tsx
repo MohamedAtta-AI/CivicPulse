@@ -20,23 +20,51 @@ export const SentimentChart = () => {
         <CardTitle>{t("sentimentAnalysis")}</CardTitle>
         <CardDescription>{t("sentimentDescription")}</CardDescription>
       </CardHeader>
-      <CardContent>
-        <ResponsiveContainer width="100%" height={300}>
-          <BarChart data={data}>
-            <CartesianGrid strokeDasharray="3 3" className="stroke-border" />
-            <XAxis dataKey="dag" className="text-xs" />
-            <YAxis className="text-xs" />
+      <CardContent className="pb-4">
+        <ResponsiveContainer width="100%" height={220}>
+          <BarChart data={data} margin={{ top: 5, right: 10, left: 0, bottom: 5 }}>
+            <CartesianGrid strokeDasharray="3 3" className="stroke-border opacity-30" />
+            <XAxis 
+              dataKey="dag" 
+              className="text-xs"
+              tick={{ fill: "hsl(var(--muted-foreground))", fontSize: 11 }}
+              axisLine={{ stroke: "hsl(var(--border))" }}
+            />
+            <YAxis 
+              className="text-xs"
+              tick={{ fill: "hsl(var(--muted-foreground))", fontSize: 11 }}
+              axisLine={{ stroke: "hsl(var(--border))" }}
+            />
             <Tooltip 
               contentStyle={{ 
                 backgroundColor: "hsl(var(--card))", 
                 border: "1px solid hsl(var(--border))",
-                borderRadius: "8px"
+                borderRadius: "8px",
+                boxShadow: "0 4px 6px -1px rgba(0, 0, 0, 0.1)"
               }}
             />
-            <Legend />
-            <Bar dataKey="positief" fill="hsl(var(--chart-3))" name={t("positive")} />
-            <Bar dataKey="neutraal" fill="hsl(var(--chart-1))" name={t("neutral")} />
-            <Bar dataKey="negatief" fill="hsl(var(--destructive))" name={t("negative")} />
+            <Legend 
+              wrapperStyle={{ fontSize: "12px", paddingTop: "8px" }}
+              iconType="square"
+            />
+            <Bar 
+              dataKey="positief" 
+              fill="hsl(142, 71%, 45%)" 
+              name={t("positive")}
+              radius={[4, 4, 0, 0]}
+            />
+            <Bar 
+              dataKey="neutraal" 
+              fill="hsl(var(--chart-1))" 
+              name={t("neutral")}
+              radius={[4, 4, 0, 0]}
+            />
+            <Bar 
+              dataKey="negatief" 
+              fill="hsl(var(--destructive))" 
+              name={t("negative")}
+              radius={[4, 4, 0, 0]}
+            />
           </BarChart>
         </ResponsiveContainer>
       </CardContent>

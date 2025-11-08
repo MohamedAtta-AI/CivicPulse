@@ -20,11 +20,11 @@ export const TopicsWordCloud = () => {
   ];
 
   const getSizeClass = (count: number) => {
-    if (count > 200) return "text-3xl";
-    if (count > 150) return "text-2xl";
-    if (count > 100) return "text-xl";
-    if (count > 75) return "text-lg";
-    return "text-base";
+    if (count > 200) return "text-xl";
+    if (count > 150) return "text-lg";
+    if (count > 100) return "text-base";
+    if (count > 75) return "text-sm";
+    return "text-xs";
   };
 
   const getColorClass = (sentiment: string) => {
@@ -39,13 +39,13 @@ export const TopicsWordCloud = () => {
         <CardTitle>{t("topicsTitle")}</CardTitle>
         <CardDescription>{t("topicsDescription")}</CardDescription>
       </CardHeader>
-      <CardContent>
-        <div className="flex flex-wrap items-center justify-center gap-4 p-4">
+      <CardContent className="pb-4">
+        <div className="flex flex-wrap items-center justify-center gap-2 p-2 min-h-[180px]">
           {topics.map((topic) => (
             <Badge
               key={topic.text}
               variant="outline"
-              className={`${getSizeClass(topic.count)} ${getColorClass(topic.sentiment)} cursor-pointer border-0 bg-secondary/50 px-3 py-2 font-medium transition-all hover:scale-110 hover:bg-secondary`}
+              className={`${getSizeClass(topic.count)} ${getColorClass(topic.sentiment)} cursor-pointer border-0 bg-secondary/50 px-2 py-1 font-medium transition-all hover:scale-105 hover:bg-secondary`}
             >
               {topic.text}
             </Badge>
