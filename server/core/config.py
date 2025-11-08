@@ -17,6 +17,10 @@ class Settings(BaseSettings):
     # Groq LLM settings
     GROQ_API_KEY: Optional[str] = Field(default=None)
     GROQ_MODEL: str = Field(default="llama-3.1-70b-versatile")
+    
+    # ChromaDB settings
+    CHROMA_HOST: str = Field(default="localhost")
+    CHROMA_PORT: int = Field(default=8000)
 
     class Config:
         # Look for .env file in the server directory

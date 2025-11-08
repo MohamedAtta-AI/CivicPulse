@@ -1,4 +1,5 @@
 from groq import Groq
+import chromadb
 from .config import get_settings
 
 
@@ -10,7 +11,18 @@ def _init_groq_client():
     return Groq(api_key=settings.GROQ_API_KEY)
 
 
+def _init_chroma_client():
+    """Initialize ChromaDB client from settings."""
+    settings = get_settings()
+    try:
+        return chromadb.HttpClient(host=settings.CHROMA_HOST, port=settings.CHROMA_PORT)
+    except Exception:
+        # Fallback to persistent client if HTTP client fails
+        return chromadb.PersistentClient(path="./chroma-data")
+
+
 groq_client = _init_groq_client()
+chroma_client = _init_chroma_client()
 
 
 def get_llm_client() -> Groq:
@@ -26,3 +38,10 @@ def get_llm_client() -> Groq:
             f"Current status: {is_set}"
         )
     return groq_client
+
+
+def get_chroma_client():
+    """Get the ChromaDB client instance."""
+    if chroma_client is None:
+        raise RuntimeError("ChromaDB client not initialized")
+    return chroma_client
