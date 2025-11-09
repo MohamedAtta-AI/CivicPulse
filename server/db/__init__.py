@@ -1,5 +1,6 @@
 from sqlmodel import SQLModel, Session, create_engine
 from core.config import get_settings
+from models import User  # Import models to register them with SQLModel
 
 settings = get_settings()
 # Only create engine if DB settings are provided

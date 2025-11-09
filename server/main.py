@@ -5,10 +5,8 @@ from fastapi.middleware.cors import CORSMiddleware
 from core.config import get_settings
 from db import init_db
 from api.dashboard import router as dashboard_router
-from api.v1 import (
-    chat,
-    retrieval
-)
+from api.v1 import chat, retrieval
+from api.auth import router as auth_router
 
 settings = get_settings()
 app = FastAPI(title=settings.APP_NAME)
@@ -28,6 +26,7 @@ async def lifespan(app: FastAPI):
     yield
 
 
+app.include_router(auth_router)
 app.include_router(dashboard_router)
 app.include_router(chat.router)
 app.include_router(retrieval.router)

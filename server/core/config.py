@@ -13,11 +13,11 @@ class Settings(BaseSettings):
     POSTGRES_HOST: Optional[str] = Field(default=None)
     POSTGRES_PORT: Optional[int] = Field(default=5432)
     POSTGRES_NAME: Optional[str] = Field(default=None)
-    
+
     # Groq LLM settings
     GROQ_API_KEY: Optional[str] = Field(default=None)
     GROQ_MODEL: str = Field(default="llama-3.1-70b-versatile")
-    
+
     # ChromaDB settings
     CHROMA_HOST: str = Field(default="localhost")
     CHROMA_PORT: int = Field(default=8000)
