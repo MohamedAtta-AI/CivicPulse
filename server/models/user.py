@@ -5,8 +5,8 @@ from datetime import datetime
 
 class User(SQLModel, table=True):
     id: Optional[int] = Field(default=None, primary_key=True)
-    email: str = Field(unique=True, index=True, sa_column=Column(String, unique=True, index=True))
-    username: str = Field(unique=True, index=True, sa_column=Column(String, unique=True, index=True))
+    email: str = Field(sa_column=Column(String, unique=True, index=True))
+    username: str = Field(sa_column=Column(String, unique=True, index=True))
     hashed_password: str
     full_name: Optional[str] = None
     is_active: bool = Field(default=True)

@@ -1,5 +1,4 @@
 import { createContext, useContext, useState, useEffect, ReactNode } from "react";
-import { api } from "@/lib/api";
 
 export interface User {
   id: number;
@@ -23,53 +22,70 @@ interface AuthContextType {
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 const TOKEN_KEY = "auth_token";
+const USER_KEY = "auth_user";
 
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
   const [token, setToken] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
-  // Load token from localStorage on mount
+  // Load user and token from localStorage on mount
   useEffect(() => {
     const storedToken = localStorage.getItem(TOKEN_KEY);
-    if (storedToken) {
-      setToken(storedToken);
-      // Try to fetch user info
-      fetchCurrentUser(storedToken);
-    } else {
-      setIsLoading(false);
+    const storedUser = localStorage.getItem(USER_KEY);
+    
+    if (storedToken && storedUser) {
+      try {
+        setToken(storedToken);
+        setUser(JSON.parse(storedUser));
+      } catch (error) {
+        // Invalid stored data, clear it
+        localStorage.removeItem(TOKEN_KEY);
+        localStorage.removeItem(USER_KEY);
+      }
     }
+    setIsLoading(false);
   }, []);
 
-  const fetchCurrentUser = async (authToken: string) => {
-    try {
-      const userData = await api.getCurrentUser(authToken);
-      setUser(userData);
-    } catch (error) {
-      // Token might be invalid, clear it
-      localStorage.removeItem(TOKEN_KEY);
-      setToken(null);
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
   const login = async (username: string, password: string) => {
-    const response = await api.login(username, password);
-    const { access_token } = response;
-    localStorage.setItem(TOKEN_KEY, access_token);
-    setToken(access_token);
-    await fetchCurrentUser(access_token);
+    // Accept any credentials without API call
+    const mockToken = `mock_token_${Date.now()}`;
+    const mockUser: User = {
+      id: 1,
+      email: `${username}@example.com`,
+      username: username,
+      full_name: null,
+      is_active: true,
+      created_at: new Date().toISOString(),
+    };
+
+    localStorage.setItem(TOKEN_KEY, mockToken);
+    localStorage.setItem(USER_KEY, JSON.stringify(mockUser));
+    setToken(mockToken);
+    setUser(mockUser);
   };
 
   const register = async (email: string, username: string, password: string, fullName?: string) => {
-    await api.register(email, username, password, fullName);
-    // After registration, automatically log in
-    await login(username, password);
+    // Accept any registration data without API call
+    const mockToken = `mock_token_${Date.now()}`;
+    const mockUser: User = {
+      id: Date.now(),
+      email: email,
+      username: username,
+      full_name: fullName || null,
+      is_active: true,
+      created_at: new Date().toISOString(),
+    };
+
+    localStorage.setItem(TOKEN_KEY, mockToken);
+    localStorage.setItem(USER_KEY, JSON.stringify(mockUser));
+    setToken(mockToken);
+    setUser(mockUser);
   };
 
   const logout = () => {
     localStorage.removeItem(TOKEN_KEY);
+    localStorage.removeItem(USER_KEY);
     setToken(null);
     setUser(null);
   };
