@@ -3,6 +3,7 @@ from fastapi import APIRouter, HTTPException
 from core import get_llm_client
 from core.config import get_settings
 from .retrieval import retrieve_relevant_chunks, format_context_for_llm
+from api.dashboard import get_metrics, get_sentiment, get_topics
 
 
 router = APIRouter(prefix="/chat", tags=["chat"])
@@ -20,6 +21,53 @@ When answering questions:
 3. If the context doesn't contain relevant information, say so clearly
 4. Be concise but thorough in your responses
 5. If asked about something not in the context, acknowledge this and provide general guidance if possible"""
+
+
+async def format_dashboard_data_for_prompt() -> str:
+    """Fetch and format dashboard data for inclusion in system prompt."""
+    try:
+        metrics = await get_metrics()
+        sentiment = await get_sentiment()
+        topics = await get_topics()
+        
+        dashboard_info = "\n=== DASHBOARD INSIGHTS ===\n\n"
+        
+        # Format metrics (handle both dict and Pydantic model)
+        dashboard_info += "KEY METRICS:\n"
+        for metric in metrics:
+            title = metric.get('title') if isinstance(metric, dict) else metric.title
+            value = metric.get('value') if isinstance(metric, dict) else metric.value
+            change = metric.get('change') if isinstance(metric, dict) else metric.change
+            trend = metric.get('trend') if isinstance(metric, dict) else metric.trend
+            dashboard_info += f"- {title}: {value} ({change}, trend: {trend})\n"
+        
+        # Format sentiment summary
+        dashboard_info += "\nSENTIMENT OVERVIEW (by day):\n"
+        for day_data in sentiment:
+            day = day_data.get('day') if isinstance(day_data, dict) else day_data.day
+            positive = day_data.get('positive') if isinstance(day_data, dict) else day_data.positive
+            neutral = day_data.get('neutral') if isinstance(day_data, dict) else day_data.neutral
+            negative = day_data.get('negative') if isinstance(day_data, dict) else day_data.negative
+            total = positive + neutral + negative
+            if total > 0:
+                pos_pct = (positive / total) * 100
+                neg_pct = (negative / total) * 100
+                dashboard_info += f"- {day.capitalize()}: {pos_pct:.1f}% positive, {neg_pct:.1f}% negative\n"
+        
+        # Format top topics
+        dashboard_info += "\nTOP DISCUSSED TOPICS:\n"
+        for topic in topics[:10]:  # Top 10 topics
+            text = topic.get('text') if isinstance(topic, dict) else topic.text
+            count = topic.get('count') if isinstance(topic, dict) else topic.count
+            sentiment_val = topic.get('sentiment') if isinstance(topic, dict) else topic.sentiment
+            dashboard_info += f"- {text}: {count} mentions (sentiment: {sentiment_val})\n"
+        
+        dashboard_info += "\nUse this dashboard data to provide context-aware answers about current civic engagement trends, sentiment patterns, and popular discussion topics.\n"
+        
+        return dashboard_info
+    except Exception as e:
+        # If dashboard data fetch fails, return empty string
+        return ""
 
 
 class ChatRequest(BaseModel):
@@ -76,14 +124,22 @@ async def chat(request: ChatRequest):
             # If retrieval fails, continue without context
             pass
     
+    # Fetch dashboard data for system prompt
+    dashboard_data = await format_dashboard_data_for_prompt()
+    
     # Build messages for the LLM
     messages = []
     
-    # Add system prompt with context if available
+    # Build system prompt with dashboard data and context
+    system_message = RAG_SYSTEM_PROMPT
+    
+    # Add dashboard data if available
+    if dashboard_data:
+        system_message += dashboard_data
+    
+    # Add RAG context if available
     if context:
-        system_message = f"{RAG_SYSTEM_PROMPT}\n\nRelevant Context:\n{context}\n\nPlease answer the user's question based on the context provided above."
-    else:
-        system_message = RAG_SYSTEM_PROMPT
+        system_message += f"\n\nRelevant Context from Knowledge Base:\n{context}\n\nPlease answer the user's question based on the dashboard insights and context provided above."
     
     messages.append({
         "role": "system",
